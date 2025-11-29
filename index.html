@@ -26,7 +26,7 @@
         width: 100%;
         max-width: 1200px;
         margin: 1.5rem;
-        padding: 1.75rem 1.5rem 1.5rem;
+        padding: 2.5rem 1.5rem 1.5rem;
         border-radius: 1.25rem;
         background: #ffffff;
         box-shadow: 0 18px 40px rgba(15, 23, 42, 0.15);
@@ -178,6 +178,7 @@
         width: 100%;
         border-collapse: collapse;
         font-size: 0.86rem;
+        table-layout: fixed;
       }
 
       thead {
@@ -192,7 +193,15 @@
         padding: 0.55rem 0.75rem;
         text-align: left;
         border-bottom: 1px solid #f3f4f6;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
       }
+
+      /* Column Widths - Desktop */
+      th:nth-child(1) { width: 40%; } /* Repository */
+      th:nth-child(2) { width: 20%; } /* Owner */
+      th:nth-child(3) { width: 20%; } /* Type */
+      th:nth-child(4) { width: 20%; } /* GitHub */
 
       th {
         font-weight: 600;
@@ -321,8 +330,8 @@
 
       @media (max-width: 768px) {
         .app-shell {
-          margin: 0.75rem;
-          padding-inline: 1rem;
+          margin: 1rem;
+          padding: 2rem 1rem 1.5rem;
         }
 
         h1 {
@@ -337,10 +346,46 @@
           font-size: 0.82rem;
         }
 
+        /* Mobile Column Widths */
+        th:nth-child(1) { width: 50%; }
+        th:nth-child(2) { width: 25%; }
+        th:nth-child(3) { width: 25%; }
+        
         th,
         td {
-          padding-inline: 0.55rem;
+          padding-inline: 0.5rem;
         }
+
+        .mobile-hidden {
+          display: none;
+        }
+
+        header {
+          flex-direction: column;
+        }
+
+        .controls {
+          width: 100%;
+        }
+
+        .search-wrapper {
+          max-width: 100%;
+        }
+
+        .select-input {
+          width: 100%;
+        }
+      }
+
+      .repo-name-link {
+        font-weight: 500;
+        color: #111827;
+        text-decoration: none;
+      }
+
+      .repo-name-link:hover {
+        color: #2563eb;
+        text-decoration: underline;
       }
     </style>
   </head>
@@ -405,10 +450,10 @@
           <table>
             <thead>
               <tr>
-                <th style="width: 32%">Repository</th>
-                <th style="width: 18%">Owner</th>
-                <th style="width: 18%">Type</th>
-                <th style="width: 22%">GitHub</th>
+                <th>Repository</th>
+                <th>Owner</th>
+                <th>Type</th>
+                <th class="mobile-hidden">GitHub</th>
               </tr>
             </thead>
             <tbody id="repoBody"></tbody>
@@ -574,7 +619,7 @@
           const tr = document.createElement("tr");
 
           const tdRepo = document.createElement("td");
-          tdRepo.innerHTML = `<span class="repo-name">${repo.name}</span>`;
+          tdRepo.innerHTML = `<a href="https://github.com/${repo.fullName}" target="_blank" rel="noopener noreferrer" class="repo-name-link">${repo.name}</a>`;
 
           const tdOwner = document.createElement("td");
           tdOwner.innerHTML = `<span class="repo-owner">${repo.owner}</span>`;
@@ -583,6 +628,7 @@
           tdType.innerHTML = `<span class="type-pill">${getTypeLabel(repo.type)}</span>`;
 
           const tdLink = document.createElement("td");
+          tdLink.className = "mobile-hidden";
           const link = document.createElement("a");
           link.href = `https://github.com/${repo.fullName}`;
           link.target = "_blank";
