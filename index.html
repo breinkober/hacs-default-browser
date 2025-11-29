@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HACS Default Repositories Browser</title>
+    <style>
+      :root {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.5;
+        color: #111827;
+        background-color: #f3f4f6;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background: radial-gradient(circle at top, #e5f0ff 0, #f3f4f6 40%, #f9fafb 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+      }
+
+      .app-shell {
+        width: 100%;
+        max-width: 1200px;
+        margin: 1.5rem;
+        padding: 1.75rem 1.5rem 1.5rem;
+        border-radius: 1.25rem;
+        background: #ffffff;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.15);
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .title-block {
+        min-width: 0;
+      }
+
+      h1 {
+        margin: 0 0 0.25rem;
+        font-size: 1.5rem;
+        letter-spacing: -0.03em;
+      }
+
+      .subtitle {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #6b7280;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+
+      .pill-dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 999px;
+        background: #22c55e;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .search-wrapper {
+        position: relative;
+        flex: 1 1 220px;
+        max-width: 340px;
+      }
+
+      .search-input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.55rem 0.9rem 0.55rem 2.05rem;
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      }
+
+      .search-input:focus {
+        border-color: #2563eb;
+        background: #ffffff;
+        box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.35);
+      }
+
+      .search-icon {
+        position: absolute;
+        inset-block: 0;
+        left: 0.8rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #9ca3af;
+        pointer-events: none;
+      }
+
+      .select-input {
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        padding: 0.45rem 0.9rem;
+        font-size: 0.85rem;
+        outline: none;
+        min-width: 170px;
+      }
+
+      .select-input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.35);
+        background: #ffffff;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        background: #f3f4f6;
+        font-size: 0.75rem;
+        color: #4b5563;
+        white-space: nowrap;
+      }
+
+      .badge strong {
+        font-weight: 600;
+      }
+
+      .badge-dot {
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 999px;
+        background: #9ca3af;
+      }
+
+      main {
+        background: #f9fafb;
+        border-radius: 1rem;
+        border: 1px solid #e5e7eb;
+        padding: 0.75rem;
+        overflow: hidden;
+      }
+
+      .table-wrapper {
+        max-height: calc(100vh - 220px);
+        overflow: auto;
+        border-radius: 0.75rem;
+        background: #ffffff;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.86rem;
+      }
+
+      thead {
+        position: sticky;
+        top: 0;
+        background: #f9fafb;
+        z-index: 1;
+      }
+
+      th,
+      td {
+        padding: 0.55rem 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #f3f4f6;
+      }
+
+      th {
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: #6b7280;
+      }
+
+      tbody tr:nth-child(odd) {
+        background: #ffffff;
+      }
+
+      tbody tr:nth-child(even) {
+        background: #f9fafb;
+      }
+
+      tbody tr:hover {
+        background: #eef2ff;
+      }
+
+      .repo-owner {
+        color: #6b7280;
+      }
+
+      .repo-name {
+        font-weight: 500;
+      }
+
+      .type-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.1rem 0.5rem;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #4b5563;
+        background: #f9fafb;
+      }
+
+      .link-button {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid #d1d5db;
+        background: #ffffff;
+        color: #2563eb;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .link-button span {
+        font-size: 0.85em;
+      }
+
+      .status-bar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: 0.25rem;
+        font-size: 0.78rem;
+        color: #6b7280;
+      }
+
+      .status-left,
+      .status-right {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .status-dot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 999px;
+        background: #e5e7eb;
+      }
+
+      .status-dot.is-loading {
+        background: #f59e0b;
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18);
+      }
+
+      .status-dot.is-ready {
+        background: #22c55e;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
+      }
+
+      .status-text {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      .status-text strong {
+        font-weight: 600;
+      }
+
+      .muted {
+        color: #9ca3af;
+      }
+
+      .error {
+        color: #b91c1c;
+      }
+
+      .empty-state {
+        padding: 2rem 1rem;
+        text-align: center;
+        color: #6b7280;
+      }
+
+      .empty-state h2 {
+        margin: 0 0 0.4rem;
+        font-size: 1rem;
+      }
+
+      .empty-state p {
+        margin: 0;
+        font-size: 0.86rem;
+      }
+
+      @media (max-width: 768px) {
+        .app-shell {
+          margin: 0.75rem;
+          padding-inline: 1rem;
+        }
+
+        h1 {
+          font-size: 1.25rem;
+        }
+
+        .table-wrapper {
+          max-height: none;
+        }
+
+        table {
+          font-size: 0.82rem;
+        }
+
+        th,
+        td {
+          padding-inline: 0.55rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header>
+        <div class="title-block">
+          <div class="pill">
+            <span class="pill-dot"></span>
+            <span>HACS default catalog</span>
+          </div>
+          <h1>HACS repositories browser</h1>
+          <p class="subtitle">
+            Browse the public default HACS repositories directly from GitHub, even when your Home Assistant is not reachable.
+          </p>
+        </div>
+        <div class="controls">
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input
+              id="searchInput"
+              class="search-input"
+              type="search"
+              placeholder="Search by repository or owner"
+              autocomplete="off"
+            />
+          </div>
+          <select id="typeFilter" class="select-input">
+            <option value="all">All types</option>
+            <option value="integration">Integrations</option>
+            <option value="plugin">Plugins</option>
+            <option value="theme">Themes</option>
+            <option value="appdaemon">AppDaemon apps</option>
+            <option value="python_script">Python scripts</option>
+            <option value="netdaemon">NetDaemon apps</option>
+          </select>
+        </div>
+      </header>
+
+      <main>
+        <div class="status-bar">
+          <div class="status-left">
+            <span class="status-text">
+              <span id="statusDot" class="status-dot is-loading"></span>
+              <span id="statusMessage">Loading repository lists from GitHub</span>
+            </span>
+          </div>
+          <div class="status-right">
+            <span class="badge">
+              <span class="badge-dot"></span>
+              <span>Total</span>
+              <strong id="totalCount">0</strong>
+            </span>
+            <span class="badge muted">
+              <span>Visible</span>
+              <strong id="visibleCount">0</strong>
+            </span>
+          </div>
+        </div>
+
+        <div class="table-wrapper" id="tableWrapper">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 32%">Repository</th>
+                <th style="width: 18%">Owner</th>
+                <th style="width: 18%">Type</th>
+                <th style="width: 22%">GitHub</th>
+              </tr>
+            </thead>
+            <tbody id="repoBody"></tbody>
+          </table>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none">
+          <h2>No repositories match your filters</h2>
+          <p>Try a different search term or type filter.</p>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const TYPE_DEFINITIONS = [
+        { id: "integration", label: "Integration" },
+        { id: "plugin", label: "Plugin" },
+        { id: "theme", label: "Theme" },
+        { id: "appdaemon", label: "AppDaemon" },
+        { id: "python_script", label: "Python script" },
+        { id: "netdaemon", label: "NetDaemon" }
+      ];
+
+      const RAW_BASE = "https://raw.githubusercontent.com/hacs/default/master/";
+
+      const state = {
+        allRepos: [],
+        filteredRepos: [],
+        loading: true,
+        error: null
+      };
+
+      function getTypeLabel(typeId) {
+        const item = TYPE_DEFINITIONS.find(t => t.id === typeId);
+        return item ? item.label : typeId;
+      }
+
+      function cleanupRepositoryLine(line) {
+        let cleaned = line.trim();
+        if (!cleaned) return "";
+        cleaned = cleaned.replace(/^['"]+/, "");
+        cleaned = cleaned.replace(/['",]+$/, "");
+        return cleaned.trim();
+      }
+
+      async function fetchListForType(typeId) {
+        const url = RAW_BASE + typeId;
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            if (response.status === 404) {
+              return [];
+            }
+            throw new Error("HTTP " + response.status + " while fetching " + typeId);
+          }
+          const text = await response.text();
+          const lines = text
+            .split("\n")
+            .map(line => line.trim())
+            .filter(line => line && !line.startsWith("#"))
+            .map(cleanupRepositoryLine);
+
+          return lines
+            .filter(fullName => fullName && fullName.includes("/"))
+            .map(fullName => ({ fullName, type: typeId }));
+        } catch (error) {
+          console.error("Error loading type", typeId, error);
+          return [];
+        }
+      }
+
+      async function loadAllRepos() {
+        const tasks = TYPE_DEFINITIONS.map(def => fetchListForType(def.id));
+        const results = await Promise.all(tasks);
+        const repos = [];
+
+        for (const list of results) {
+          for (const repo of list) {
+            const [owner, name] = repo.fullName.split("/");
+            repos.push({
+              fullName: repo.fullName,
+              owner: owner || "",
+              name: name || repo.fullName,
+              type: repo.type
+            });
+          }
+        }
+
+        repos.sort((a, b) => a.fullName.localeCompare(b.fullName));
+        state.allRepos = repos;
+        state.loading = false;
+        updateFiltersAndRender();
+      }
+
+      function updateStatusBar() {
+        const totalCountEl = document.getElementById("totalCount");
+        const visibleCountEl = document.getElementById("visibleCount");
+        const statusMessageEl = document.getElementById("statusMessage");
+        const statusDotEl = document.getElementById("statusDot");
+
+        totalCountEl.textContent = state.allRepos.length.toString();
+        visibleCountEl.textContent = state.filteredRepos.length.toString();
+
+        if (state.loading) {
+          statusMessageEl.textContent = "Loading repository lists from GitHub";
+          statusDotEl.classList.add("is-loading");
+          statusDotEl.classList.remove("is-ready");
+        } else if (state.error) {
+          statusMessageEl.textContent = state.error;
+          statusMessageEl.classList.add("error");
+          statusDotEl.classList.remove("is-loading");
+          statusDotEl.classList.remove("is-ready");
+        } else {
+          statusMessageEl.textContent = "Loaded repositories from HACS default catalog";
+          statusMessageEl.classList.remove("error");
+          statusDotEl.classList.remove("is-loading");
+          statusDotEl.classList.add("is-ready");
+        }
+      }
+
+      function applyFilters() {
+        const searchValue = document
+          .getElementById("searchInput")
+          .value.trim()
+          .toLowerCase();
+        const typeFilter = document.getElementById("typeFilter").value;
+
+        let result = state.allRepos;
+
+        if (typeFilter !== "all") {
+          result = result.filter(repo => repo.type === typeFilter);
+        }
+
+        if (searchValue) {
+          result = result.filter(repo => {
+            const haystack = `${repo.fullName} ${getTypeLabel(repo.type)}`.toLowerCase();
+            return haystack.includes(searchValue);
+          });
+        }
+
+        state.filteredRepos = result;
+      }
+
+      function renderTable() {
+        const tbody = document.getElementById("repoBody");
+        const emptyState = document.getElementById("emptyState");
+        const tableWrapper = document.getElementById("tableWrapper");
+
+        tbody.innerHTML = "";
+
+        if (!state.filteredRepos.length) {
+          tableWrapper.style.display = "none";
+          emptyState.style.display = "block";
+          return;
+        }
+
+        tableWrapper.style.display = "block";
+        emptyState.style.display = "none";
+
+        const fragment = document.createDocumentFragment();
+
+        for (const repo of state.filteredRepos) {
+          const tr = document.createElement("tr");
+
+          const tdRepo = document.createElement("td");
+          tdRepo.innerHTML = `<span class="repo-name">${repo.name}</span>`;
+
+          const tdOwner = document.createElement("td");
+          tdOwner.innerHTML = `<span class="repo-owner">${repo.owner}</span>`;
+
+          const tdType = document.createElement("td");
+          tdType.innerHTML = `<span class="type-pill">${getTypeLabel(repo.type)}</span>`;
+
+          const tdLink = document.createElement("td");
+          const link = document.createElement("a");
+          link.href = `https://github.com/${repo.fullName}`;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.className = "link-button";
+          link.innerHTML = '<span>Open</span><span>↗</span>';
+          tdLink.appendChild(link);
+
+          tr.appendChild(tdRepo);
+          tr.appendChild(tdOwner);
+          tr.appendChild(tdType);
+          tr.appendChild(tdLink);
+          fragment.appendChild(tr);
+        }
+
+        tbody.appendChild(fragment);
+      }
+
+      function updateFiltersAndRender() {
+        applyFilters();
+        renderTable();
+        updateStatusBar();
+      }
+
+      function setupEventListeners() {
+        const searchInput = document.getElementById("searchInput");
+        const typeFilter = document.getElementById("typeFilter");
+
+        let searchTimeout = null;
+        searchInput.addEventListener("input", () => {
+          if (searchTimeout) {
+            window.clearTimeout(searchTimeout);
+          }
+          searchTimeout = window.setTimeout(() => {
+            updateFiltersAndRender();
+          }, 120);
+        });
+
+        typeFilter.addEventListener("change", () => {
+          updateFiltersAndRender();
+        });
+      }
+
+      function runInternalTests() {
+        const raw = '"owner/repo",';
+        const cleaned = cleanupRepositoryLine(raw);
+        console.assert(
+          cleaned === "owner/repo",
+          "cleanupRepositoryLine should strip double quotes and trailing comma",
+          { raw, cleaned }
+        );
+
+        const raw2 = "  owner2/repo2  ";
+        const cleaned2 = cleanupRepositoryLine(raw2);
+        console.assert(
+          cleaned2 === "owner2/repo2",
+          "cleanupRepositoryLine should trim whitespace",
+          { raw2, cleaned2 }
+        );
+
+        const raw3 = "'owner3/repo3',";
+        const cleaned3 = cleanupRepositoryLine(raw3);
+        console.assert(
+          cleaned3 === "owner3/repo3",
+          "cleanupRepositoryLine should handle single quotes",
+          { raw3, cleaned3 }
+        );
+
+        const raw4 = "'owner4/repo4\" ,";
+        const cleaned4 = cleanupRepositoryLine(raw4);
+        console.assert(
+          cleaned4 === "owner4/repo4",
+          "cleanupRepositoryLine should handle mixed quotes and comma",
+          { raw4, cleaned4 }
+        );
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        runInternalTests();
+        setupEventListeners();
+        loadAllRepos().catch(error => {
+          console.error(error);
+          state.loading = false;
+          state.error = "Could not load repositories from GitHub";
+          updateFiltersAndRender();
+        });
+      });
+    </script>
+  </body>
+</html>
